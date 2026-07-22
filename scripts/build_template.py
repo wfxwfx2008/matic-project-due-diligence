@@ -89,33 +89,6 @@ def add_page_number(paragraph):
     set_run_font(run, CN_BODY, 10.5)
 
 
-def add_toc(doc):
-    """Insert a clickable TOC field covering outline levels 1–3."""
-    p = doc.add_paragraph()
-    p.paragraph_format.first_line_indent = Pt(0)
-    p.paragraph_format.line_spacing = Pt(20)
-    begin_run = p.add_run()
-    begin = OxmlElement("w:fldChar")
-    begin.set(qn("w:fldCharType"), "begin")
-    begin.set(qn("w:dirty"), "true")
-    begin_run._r.append(begin)
-    instr_run = p.add_run()
-    instr = OxmlElement("w:instrText")
-    instr.set(qn("xml:space"), "preserve")
-    instr.text = ' TOC \\o "1-3" \\h \\z \\u '
-    instr_run._r.append(instr)
-    separate_run = p.add_run()
-    separate = OxmlElement("w:fldChar")
-    separate.set(qn("w:fldCharType"), "separate")
-    separate_run._r.append(separate)
-    placeholder = p.add_run('打开文档后，如目录未自动刷新，请右键选择“更新域”。')
-    set_run_font(placeholder, CN_BODY, 10.5)
-    end_run = p.add_run()
-    end = OxmlElement("w:fldChar")
-    end.set(qn("w:fldCharType"), "end")
-    end_run._r.append(end)
-
-
 def enable_field_updates(doc):
     settings = doc.settings._element
     update = settings.find(qn("w:updateFields"))
@@ -144,7 +117,7 @@ def set_cell_text(cell, text, bold=False, align=WD_ALIGN_PARAGRAPH.LEFT):
     p.paragraph_format.left_indent = Pt(0)
     p.paragraph_format.line_spacing = Pt(15)
     r = p.add_run(text)
-    set_run_font(r, CN_BODY, 9, bold=bold)
+    set_run_font(r, CN_BODY, 10.5, bold=bold)
 
 
 def add_meta_table(doc):
@@ -239,10 +212,6 @@ def build():
     add_placeholder_table(doc, ["核心价值", "临床意义与技术创新性", "下一步动作"], 1)
     add_placeholder_table(doc, ["核心优势", "核心风险", "一票否决状态"], 2)
     add_placeholder_table(doc, ["评价维度", "星级", "主要依据"], 8)
-    doc.add_page_break()
-    p = doc.add_paragraph(style="MATIC Subtitle")
-    p.add_run("目录")
-    add_toc(doc)
     doc.add_page_break()
 
     sections = [
