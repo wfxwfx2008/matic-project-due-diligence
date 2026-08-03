@@ -1,11 +1,9 @@
 interface:
-  display_name: "\u533B\u521B\u4E2D\u5FC3\u9879\u76EE\u5C3D\u8C03"
-  short_description: "\u6838\u9A8C\u533B\u7597\u79D1\u6280\u9879\u76EEBP\u5E76\u751F\
-    \u6210\u89C4\u8303\u3001\u53EF\u8FFD\u6EAF\u7684\u5185\u90E8\u5C3D\u8C03\u62A5\
-    \u544A"
-  default_prompt: "\u4F7F\u7528 $matic-project-due-diligence \u8BFB\u53D6\u8FD9\u4EFD\
-    \u9879\u76EEBP\uFF0C\u5148\u63D0\u51FA\u6F84\u6E05\u95EE\u9898\uFF0C\u5F85\u6211\
-    \u786E\u8BA4\u540E\u5F00\u5C55\u5C3D\u8C03\u3002"
+  display_name: 医创中心项目尽调
+  short_description: 核验医疗科技项目BP，并持续开展标准与详细尽调
+  default_prompt: 使用 $matic-project-due-diligence 处理这个项目；先识别是标准尽调、详细尽调更新还是报告生成，再按对应流程执行。
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
 policy:
   allow_implicit_invocation: false
   products:

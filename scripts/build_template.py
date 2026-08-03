@@ -123,7 +123,7 @@ def set_cell_text(cell, text, bold=False, align=WD_ALIGN_PARAGRAPH.LEFT):
 def add_meta_table(doc):
     table = doc.add_table(rows=4, cols=2)
     table.style = "Table Grid"
-    labels = ["项目名称", "报告版本", "尽调状态", "报告日期"]
+    labels = ["项目名称", "报告版本", "尽调建议", "报告日期"]
     values = ["[项目名称]", "V1.0", "初筛中", "[YYYY年MM月DD日]"]
     for row, label, value in zip(table.rows, labels, values):
         set_cell_text(row.cells[0], label, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
@@ -143,6 +143,34 @@ def add_placeholder_table(doc, headers, row_count=2):
         for cell in row.cells:
             set_cell_text(cell, "[待填写]")
     return table
+
+
+def add_project_overview_table(doc):
+    labels = [
+        "项目名称",
+        "目标产品",
+        "目标适应证、临床场景及科室",
+        "核心技术",
+        "当前研发阶段",
+        "项目目标",
+        "项目负责人",
+        "实施主体或成果依托单位",
+        "转化、公司化及融资状态",
+        "材料与报告信息",
+    ]
+    table = doc.add_table(rows=len(labels), cols=2)
+    table.style = "Table Grid"
+    for row, label in zip(table.rows, labels):
+        set_cell_text(row.cells[0], label, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
+        set_cell_text(row.cells[1], "[待填写]")
+    return table
+
+
+def add_analysis_block(doc, heading, rating="★★★☆☆"):
+    doc.add_paragraph(f"{heading}　{rating}", style="MATIC Heading 2")
+    doc.add_paragraph("核心判断：[基于独立检索与核验形成一句话判断。]")
+    doc.add_paragraph("主要依据：[列出关键事实并紧邻标注引用编号。]")
+    doc.add_paragraph("关键不确定性：[说明尚缺证据及其对判断的影响。]")
 
 
 def build():
@@ -206,48 +234,62 @@ def build():
     set_run_font(r, CN_BODY, 16)
     p.runs[0].add_break(WD_BREAK.PAGE)
 
-    doc.add_paragraph("一、一页核心结论", style="MATIC Heading 1")
-    add_placeholder_table(doc, ["项目定义", "[一句话说明项目、产品和适应证]"], 0)
-    add_placeholder_table(doc, ["尽调建议", "[建议推进/有条件推进/暂缓推进/不建议推进等，并说明关键前置条件]"], 0)
-    add_placeholder_table(doc, ["核心价值", "临床意义与技术创新性", "下一步动作"], 1)
-    add_placeholder_table(doc, ["核心优势", "核心风险", "一票否决状态"], 2)
-    add_placeholder_table(doc, ["评价维度", "星级", "主要依据"], 8)
+    doc.add_paragraph("第一部分　项目初步研判", style="MATIC Heading 1")
+    doc.add_paragraph("一、项目概要", style="MATIC Heading 2")
+    doc.add_paragraph("[用约200—300字说明项目做什么、解决什么问题、拟形成什么产品及实现什么目标。BP主张须使用归因表达。]")
+    add_project_overview_table(doc)
     doc.add_page_break()
 
+    add_analysis_block(doc, "二、战略性")
+    add_analysis_block(doc, "三、先进性")
+    add_analysis_block(doc, "四、可行性")
+    doc.add_page_break()
+
+    doc.add_paragraph("五、AI综合研判意见", style="MATIC Heading 2")
+    doc.add_paragraph("尽调建议：[状态＋拟进入的具体阶段。]")
+    doc.add_paragraph("1. 核心优势：[列出2—3项经核验的项目优势。]")
+    doc.add_paragraph("2. 关键风险：[列出3—5项可能影响推进的风险。]")
+    doc.add_paragraph("3. 一票否决或重大前置条件：[说明确认触发、疑似触发或解除条件。]")
+    doc.add_paragraph("4. 与医创中心的合作适配性：[与项目本身价值分开判断。]")
+    doc.add_paragraph("5. 下一阶段及验证事项：[说明下一步动作、验证标准及停止推进条件。]")
+    doc.add_page_break()
+
+    doc.add_paragraph("第二部分　项目尽调分析", style="MATIC Heading 1")
+
     sections = [
-        "二、项目基本情况与尽调状态",
-        "三、BP关键主张核验表",
-        "四、临床需求与未满足痛点",
-        "五、政策环境与战略价值",
-        "六、技术创新性分析",
-        "七、知识产权与技术壁垒",
-        "八、注册路径与临床转化可行性",
-        "九、产业链分析",
-        "十、国内外竞品及替代方案对比",
-        "十一、市场规模测算",
-        "十二、团队构成分析",
-        "十三、产品成熟度与产业化可行性",
-        "十四、商业模式与股权架构分析",
-        "十五、重大风险与一票否决事项",
-        "十六、八维度五星评级及综合判断",
-        "十七、与医创中心合作的参考建议",
-        "十八、项目方待补充材料清单",
-        "十九、进一步调研问题清单",
-        "二十、参考来源及附录",
+        "一、项目基本情况与尽调状态",
+        "二、BP关键主张核验表",
+        "三、临床需求与未满足痛点",
+        "四、政策环境与战略价值",
+        "五、技术创新性分析",
+        "六、知识产权与技术壁垒",
+        "七、注册路径与临床转化可行性",
+        "八、产业链分析",
+        "九、国内外竞品及替代方案对比",
+        "十、市场规模测算",
+        "十一、团队构成分析",
+        "十二、产品成熟度与产业化可行性",
+        "十三、商业模式与股权架构分析",
+        "十四、重大风险与一票否决事项",
+        "十五、八维度五星评级及综合判断",
+        "十六、与医创中心合作的参考建议",
+        "十七、项目方待补充材料清单",
+        "十八、进一步调研问题清单",
+        "十九、参考来源及附录",
     ]
     for idx, heading in enumerate(sections):
-        doc.add_paragraph(heading, style="MATIC Heading 1")
+        doc.add_paragraph(heading, style="MATIC Heading 2")
         if idx == 1:
             add_placeholder_table(doc, ["序号", "BP关键主张", "外部证据", "核验结果", "置信度", "影响"], 3)
         elif idx == 8:
             add_placeholder_table(doc, ["方案", "类型", "注册/应用状态", "关键差异", "证据来源"], 3)
-        elif idx == 14:
+        elif idx == 13:
             add_placeholder_table(doc, ["事项", "触发等级", "事实与证据", "影响及解除条件"], 2)
-        elif idx == 17:
+        elif idx == 16:
             add_placeholder_table(doc, ["序号", "待补充材料", "用途", "优先级"], 3)
-        elif idx == 18:
+        elif idx == 17:
             add_placeholder_table(doc, ["对象", "问题", "拟验证事项"], 3)
-        elif idx == 19:
+        elif idx == 18:
             add_placeholder_table(doc, ["序号", "来源", "标题", "日期", "链接"], 3)
         else:
             doc.add_paragraph("[根据BP、公开检索和独立分析填写。区分项目方陈述、公开事实、推断与待核实事项。]")
