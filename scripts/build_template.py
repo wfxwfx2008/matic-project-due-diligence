@@ -10,6 +10,8 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
 
+from normalize_docx_tables import normalize_table_paragraphs, set_zero_first_line_indent
+
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "assets" / "matic-due-diligence-template.docx"
@@ -113,7 +115,7 @@ def set_cell_text(cell, text, bold=False, align=WD_ALIGN_PARAGRAPH.LEFT):
     p.alignment = align
     p.paragraph_format.space_before = Pt(0)
     p.paragraph_format.space_after = Pt(0)
-    p.paragraph_format.first_line_indent = Pt(0)
+    set_zero_first_line_indent(p)
     p.paragraph_format.left_indent = Pt(0)
     p.paragraph_format.line_spacing = Pt(15)
     r = p.add_run(text)
@@ -301,6 +303,7 @@ def build():
     props.keywords = "MATIC, 尽调, 医疗科技, BP"
     enable_field_updates(doc)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    normalize_table_paragraphs(doc)
     doc.save(OUTPUT)
     print(OUTPUT)
 

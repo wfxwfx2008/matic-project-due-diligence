@@ -23,6 +23,7 @@ from build_template import (
     set_cell_text,
     set_run_font,
 )
+from normalize_docx_tables import normalize_table_paragraphs
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -262,6 +263,7 @@ def build_startup_template():
     props.author = "长三角医学先进技术创新中心"
     props.keywords = "MATIC, 详细尽调, 启动方案, 医疗科技"
     STARTUP_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    normalize_table_paragraphs(doc)
     doc.save(STARTUP_OUTPUT)
     print(STARTUP_OUTPUT)
 
@@ -332,6 +334,7 @@ def build_report_template():
     props.author = "长三角医学先进技术创新中心"
     props.keywords = "MATIC, 详细尽调, 专家访谈, 医疗科技"
     REPORT_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    normalize_table_paragraphs(doc)
     doc.save(REPORT_OUTPUT)
     print(REPORT_OUTPUT)
 
