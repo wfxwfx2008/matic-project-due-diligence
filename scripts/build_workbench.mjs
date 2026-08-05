@@ -157,7 +157,7 @@ async function ensureFrozenPanes(xlsxPath) {
   await fs.mkdir(unpacked, { recursive: true });
   try {
     await execFileAsync("unzip", ["-q", xlsxPath, "-d", unpacked]);
-    for (let index = 1; index <= 9; index += 1) {
+    for (let index = 1; index <= 10; index += 1) {
       const rows = index === 1 ? 2 : 4;
       const xmlPath = path.join(unpacked, "xl", "worksheets", `sheet${index}.xml`);
       let xml = await fs.readFile(xmlPath, "utf8");
@@ -183,6 +183,7 @@ const home = workbook.worksheets.add("首页");
 const candidate = workbook.worksheets.add("调研对象候选库");
 const interview = workbook.worksheets.add("联系与访谈进度");
 const material = workbook.worksheets.add("材料及专家报告索引");
+const competition = workbook.worksheets.add("竞品与替代方案矩阵");
 const issue = workbook.worksheets.add("问题跟踪表");
 const conclusion = workbook.worksheets.add("结论登记表");
 const dispute = workbook.worksheets.add("专家分歧表");
@@ -236,6 +237,26 @@ addListValidation(material, "H", ["未确认", "待确认", "已确认", "不纳
 addListValidation(material, "I", ["项目方陈述", "专家判断", "原始数据", "第三方证据", "公开事实", "AI推断"]);
 addStatusFormatting(material, `H${DATA_START}:H${DATA_END}`);
 formatDateColumns(material, ["G"]);
+
+
+applyBaseSheet(
+  competition,
+  "竞品与替代方案矩阵",
+  "每个“比较对象×对比维度”单独一行并沿用稳定CMP编号；启动时继承标准尽调结果，新增材料须主动识别新对象、新路线和新优劣势。",
+  ["对比编号", "对比对象", "研发或供应主体", "对象分类", "产品/技术阶段", "目标适应证或场景", "对比维度", "本项目相对结论", "具体判断", "数据比较条件", "可比性", "证据性质", "证据强度", "专家支持", "专家反对或限制", "对竞争地位的影响", "持续性或可弥补性", "下一步验证动作", "判定标准", "关联问题编号", "关联材料或访谈编号", "关联结论编号", "当前状态", "最后更新日期", "备注"],
+  [12, 24, 22, 18, 18, 24, 18, 16, 34, 30, 15, 22, 12, 30, 30, 18, 20, 30, 28, 18, 24, 20, 16, 15, 24],
+  "CompetitionMatrix",
+);
+addListValidation(competition, "D", ["直接竞品", "间接竞品", "医院现行方案", "潜在替代技术"]);
+addListValidation(competition, "H", ["相对优势", "相对劣势", "基本相当", "暂无法判断"]);
+addListValidation(competition, "K", ["直接可比", "有限可比", "不可直接比较"]);
+addListValidation(competition, "L", ["直接头对头数据", "可比公开数据", "跨研究间接比较", "项目方主张", "专家判断", "暂无可靠证据"]);
+addListValidation(competition, "M", ["强", "中", "弱"]);
+addListValidation(competition, "P", ["重大正面", "正面", "中性", "负面", "重大负面", "待判断"]);
+addListValidation(competition, "Q", ["结构性优势", "阶段性领先", "容易追赶", "可弥补劣势", "难弥补劣势", "待判断", "不适用"]);
+addListValidation(competition, "W", ["草拟", "待补证", "基本确认", "已确认", "仍有争议", "已替代", "已失效"]);
+addStatusFormatting(competition, `W${DATA_START}:W${DATA_END}`);
+formatDateColumns(competition, ["X"]);
 
 
 applyBaseSheet(
@@ -347,11 +368,12 @@ home.getRange("A5:B11").values = [
   ["当前尽调建议", "[待填写]"],
 ];
 home.getRange("D4:E4").values = [["进展指标", "当前数量"]];
-home.getRange("D5:D10").values = [["候选对象"], ["已完成访谈"], ["已登记材料"], ["开放问题"], ["有效结论"], ["重大风险"]];
-home.getRange("E5:E10").formulas = [
+home.getRange("D5:D11").values = [["候选对象"], ["已完成访谈"], ["已登记材料"], ["竞品对比记录"], ["开放问题"], ["有效结论"], ["重大风险"]];
+home.getRange("E5:E11").formulas = [
   ["=COUNTA('调研对象候选库'!$A$5:$A$204)"],
   ["=COUNTIF('联系与访谈进度'!$F$5:$F$204,\"已完成\")"],
   ["=COUNTA('材料及专家报告索引'!$A$5:$A$204)"],
+  ["=COUNTA('竞品与替代方案矩阵'!$A$5:$A$204)"],
   ["=COUNTIF('问题跟踪表'!$H$5:$H$204,\"<>\")-COUNTIF('问题跟踪表'!$H$5:$H$204,\"已确认\")-COUNTIF('问题跟踪表'!$H$5:$H$204,\"已解除风险\")"],
   ["=COUNTIFS('结论登记表'!$A$5:$A$204,\"<>\",'结论登记表'!$J$5:$J$204,\"<>已合并\",'结论登记表'!$J$5:$J$204,\"<>已推翻\",'结论登记表'!$J$5:$J$204,\"<>已失效\")"],
   ["=COUNTIF('问题跟踪表'!$I$5:$I$204,\"重大\")"],
@@ -362,7 +384,7 @@ home.getRange("A4:B11").format = {
   borders: { preset: "all", style: "thin", color: COLORS.border },
   verticalAlignment: "center",
 };
-home.getRange("D4:E10").format = {
+home.getRange("D4:E11").format = {
   font: { name: FONT, size: 10, color: COLORS.text },
   wrapText: true,
   borders: { preset: "all", style: "thin", color: COLORS.border },
@@ -371,8 +393,8 @@ home.getRange("D4:E10").format = {
 home.getRange("A4:B4").format = { fill: COLORS.navy, font: { name: FONT, size: 10, bold: true, color: COLORS.white }, horizontalAlignment: "center" };
 home.getRange("D4:E4").format = { fill: COLORS.navy, font: { name: FONT, size: 10, bold: true, color: COLORS.white }, horizontalAlignment: "center" };
 home.getRange("A5:A11").format = { fill: COLORS.blue, font: { name: FONT, size: 10, bold: true, color: COLORS.text } };
-home.getRange("D5:D10").format = { fill: COLORS.blue, font: { name: FONT, size: 10, bold: true, color: COLORS.text } };
-home.getRange("E5:E10").format.numberFormat = "0";
+home.getRange("D5:D11").format = { fill: COLORS.blue, font: { name: FONT, size: 10, bold: true, color: COLORS.text } };
+home.getRange("E5:E11").format.numberFormat = "0";
 
 home.getRange("A13:D13").merge();
 home.getRange("A13").values = [["状态色说明"]];
@@ -392,21 +414,22 @@ home.getRange("A17:D17").format.fill = COLORS.gray;
 home.getRange("A19:H19").merge();
 home.getRange("A19").values = [["使用提示"]];
 home.getRange("A19:H19").format = { fill: COLORS.navy, font: { name: FONT, size: 10, bold: true, color: COLORS.white } };
-home.getRange("A20:H23").merge(true);
-home.getRange("A20:A23").values = [
+home.getRange("A20:H24").merge(true);
+home.getRange("A20:A24").values = [
   ["1. 启动详细尽调时先建立问题、候选对象和材料计划，不得在无专家证据时强行形成稳定结论。"],
   ["2. 每份新材料先登记索引，再更新问题、结论、分歧和第一部分入选结论。"],
-  ["3. 阶段性或最终报告只在明确指令后生成；成文前检查专家证据门槛、去重和结论历史。"],
-  ["4. 本工作台不处理录音转写，仅接收已确认的专家意见表或文字记录。"],
+  ["3. 竞品矩阵每行记录一个对象与一个维度；每次更新均检查新对象、新路线、新优劣势及比较条件变化。"],
+  ["4. 阶段性或最终报告只在明确指令后生成；成文前检查专家证据门槛、去重和结论历史。"],
+  ["5. 本工作台不处理录音转写，不设置固定市场规模工作表；市场重大变化使用现有清单记录。"],
 ];
-home.getRange("A20:H23").format = { fill: COLORS.paleBlue, font: { name: FONT, size: 10, color: COLORS.text }, wrapText: true, borders: { preset: "all", style: "thin", color: COLORS.border } };
+home.getRange("A20:H24").format = { fill: COLORS.paleBlue, font: { name: FONT, size: 10, color: COLORS.text }, wrapText: true, borders: { preset: "all", style: "thin", color: COLORS.border } };
 home.getRange("A:A").format.columnWidth = 18;
 home.getRange("B:B").format.columnWidth = 30;
 home.getRange("C:C").format.columnWidth = 8;
 home.getRange("D:D").format.columnWidth = 20;
 home.getRange("E:E").format.columnWidth = 15;
 home.getRange("F:H").format.columnWidth = 14;
-home.getRange("A4:H23").format.rowHeight = 28;
+home.getRange("A4:H24").format.rowHeight = 28;
 home.freezePanes.freezeRows(2);
 
 
@@ -417,7 +440,7 @@ await ensureFrozenPanes(outputPath);
 
 if (previewDir) {
   await fs.mkdir(previewDir, { recursive: true });
-  for (const sheetName of ["首页", "调研对象候选库", "联系与访谈进度", "材料及专家报告索引", "问题跟踪表", "结论登记表", "专家分歧表", "第一部分入选结论", "更新日志"]) {
+  for (const sheetName of ["首页", "调研对象候选库", "联系与访谈进度", "材料及专家报告索引", "竞品与替代方案矩阵", "问题跟踪表", "结论登记表", "专家分歧表", "第一部分入选结论", "更新日志"]) {
     const preview = await workbook.render({ sheetName, autoCrop: "all", scale: 1, format: "png" });
     const safeName = sheetName.replaceAll("/", "_");
     await fs.writeFile(path.join(previewDir, `${safeName}.png`), new Uint8Array(await preview.arrayBuffer()));

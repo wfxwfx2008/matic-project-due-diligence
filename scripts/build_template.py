@@ -284,7 +284,23 @@ def build():
         if idx == 1:
             add_placeholder_table(doc, ["序号", "BP关键主张", "外部证据", "核验结果", "置信度", "影响"], 3)
         elif idx == 8:
-            add_placeholder_table(doc, ["方案", "类型", "注册/应用状态", "关键差异", "证据来源"], 3)
+            add_placeholder_table(
+                doc,
+                ["对比对象", "类别/阶段", "本项目相对优势", "本项目相对劣势", "证据与可比性", "竞争影响及验证事项"],
+                7,
+            )
+            doc.add_paragraph(
+                "结论归纳：[分别总结可靠证据支持的优势、BP主张待验证的优势、结构性劣势和决定性验证任务。]"
+            )
+        elif idx == 9:
+            add_placeholder_table(
+                doc,
+                ["市场层级", "边界与公式", "测算区间", "数据或代理依据", "可靠性与关键假设"],
+                5,
+            )
+            doc.add_paragraph(
+                "说明：[以中国市场为主、全球市场作补充，使用保守/基准/积极情景；校验项目销售与SOM、产能和医院准入。]"
+            )
         elif idx == 13:
             add_placeholder_table(doc, ["事项", "触发等级", "事实与证据", "影响及解除条件"], 2)
         elif idx == 16:

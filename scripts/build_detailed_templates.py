@@ -188,6 +188,39 @@ def add_second_part_section(doc, heading, kind="text"):
             ["材料编号", "访谈编号", "专家/提供方", "文件名称", "日期", "使用范围"],
             4,
         )
+    elif kind == "competition":
+        doc.add_paragraph("（一）竞争格局、代表产品与替代路线", style="MATIC Heading 3")
+        add_placeholder_table(
+            doc,
+            ["对比编号/对象", "类别与阶段", "对比维度", "本项目相对优劣势", "证据/可比性", "竞争影响"],
+            6,
+        )
+        doc.add_paragraph("（二）专家证据、持续性与验证计划", style="MATIC Heading 3")
+        add_placeholder_table(
+            doc,
+            ["当前判断", "专家支持/反对及限制", "持续性或可弥补性", "验证动作与判定标准"],
+            4,
+        )
+        doc.add_paragraph(
+            "[第二部分完整保留全部有效比较；仅有公开证据或AI推断的内容标注待专家验证，不得冒充第一部分专家结论。]"
+        )
+    elif kind == "market":
+        doc.add_paragraph("（一）五层市场模型及变化", style="MATIC Heading 3")
+        add_placeholder_table(
+            doc,
+            ["市场层级", "边界与公式", "当前区间", "相较标准尽调的变化", "依据/可靠性/敏感变量"],
+            5,
+        )
+        doc.add_paragraph("（二）商业验证与项目销售校验", style="MATIC Heading 3")
+        doc.add_paragraph(
+            "[说明中国市场为主、全球市场为补充；校验SOM、项目销售、产能、渠道和医院准入。无直接数据时披露代理变量与调整依据。]"
+        )
+        doc.add_paragraph("（三）完整市场结论及状态", style="MATIC Heading 3")
+        add_placeholder_table(
+            doc,
+            ["结论编号", "优势/风险", "当前结论", "专家证据", "客观证据", "状态"],
+            4,
+        )
     else:
         doc.add_paragraph(
             "[围绕关键问题展开完整分析，区分项目方陈述、专家判断、公开事实、第三方证据、独立推断和待核实事项。]"
@@ -228,6 +261,9 @@ def build_startup_template():
         doc,
         ["专项", "尽调目标", "核心问题", "拟采用证据", "阶段交付", "完成条件"],
         6,
+    )
+    doc.add_paragraph(
+        "说明：继承标准尽调的竞品与替代方案比较，建立暂定竞品矩阵并标注待专家验证；继承五层市场模型，市场规模不作为固定专家访谈重点。"
     )
 
     doc.add_paragraph("四、调研对象与访谈安排", style="MATIC Heading 1")
@@ -315,8 +351,8 @@ def build_report_template():
         ("三、临床需求、政策与适应证格局", "text"),
         ("四、技术专项尽调", "conclusions"),
         ("五、注册与临床转化专项", "text"),
-        ("六、竞品及潜在替代方案", "text"),
-        ("七、市场与商业专项尽调", "conclusions"),
+        ("六、竞品、替代方案及相对优劣势分析", "competition"),
+        ("七、市场与商业专项尽调", "market"),
         ("八、产业链与产业化专项", "text"),
         ("九、核心团队专项尽调", "conclusions"),
         ("十、知识产权、成果权属与股权专项", "conclusions"),
