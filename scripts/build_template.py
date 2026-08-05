@@ -51,7 +51,7 @@ def configure_style(style, east_asia, size, bold=False, align=None, indent=True,
     pf.line_spacing = Pt(29.5)
     pf.space_before = Pt(0)
     pf.space_after = Pt(0)
-    pf.first_line_indent = Pt(32) if indent else None
+    pf.first_line_indent = Pt(32) if indent else Pt(0)
     if align is not None:
         pf.alignment = align
     ppr = style._element.get_or_add_pPr()
@@ -82,6 +82,7 @@ def add_page_number(paragraph):
         if child.tag != qn("w:pPr"):
             paragraph._p.remove(child)
     paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    set_zero_first_line_indent(paragraph)
     run = paragraph.add_run("— ")
     set_run_font(run, CN_BODY, 10.5)
     fld = OxmlElement("w:fldSimple")
@@ -185,7 +186,7 @@ def build():
     section.left_margin = Cm(2.7)
     section.right_margin = Cm(2.7)
 
-    configure_style(doc.styles["Normal"], CN_BODY, 16, indent=True)
+    configure_style(doc.styles["Normal"], CN_BODY, 16, align=WD_ALIGN_PARAGRAPH.JUSTIFY, indent=True)
     title_style = get_or_add_paragraph_style(doc, "MATIC Title")
     subtitle_style = get_or_add_paragraph_style(doc, "MATIC Subtitle")
     heading1_style = get_or_add_paragraph_style(doc, "MATIC Heading 1")
@@ -194,31 +195,33 @@ def build():
     caption_style = get_or_add_paragraph_style(doc, "MATIC Caption")
     configure_style(title_style, CN_TITLE, 22, align=WD_ALIGN_PARAGRAPH.CENTER, indent=False)
     configure_style(subtitle_style, CN_KAI, 16, align=WD_ALIGN_PARAGRAPH.CENTER, indent=False)
-    configure_style(heading1_style, CN_HEI, 16, bold=True, indent=False, outline_level=0)
-    configure_style(heading2_style, CN_KAI, 16, indent=False, outline_level=1)
-    configure_style(heading3_style, CN_KAI, 16, indent=False, outline_level=2)
+    configure_style(heading1_style, CN_HEI, 16, bold=True, align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, outline_level=0)
+    configure_style(heading2_style, CN_KAI, 16, align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, outline_level=1)
+    configure_style(heading3_style, CN_KAI, 16, align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, outline_level=2)
     configure_style(caption_style, CN_BODY, 10.5, align=WD_ALIGN_PARAGRAPH.CENTER, indent=False)
     if "Source Text" not in [s.name for s in doc.styles]:
         source = doc.styles.add_style("Source Text", WD_STYLE_TYPE.PARAGRAPH)
     else:
         source = doc.styles["Source Text"]
-    configure_style(source, CN_BODY, 10.5, indent=False)
+    configure_style(source, CN_BODY, 10.5, align=WD_ALIGN_PARAGRAPH.LEFT, indent=False)
 
     for sec in doc.sections:
         add_page_number(sec.footer.paragraphs[0])
 
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.first_line_indent = Pt(0)
+    set_zero_first_line_indent(p)
     p.paragraph_format.space_after = Pt(48)
     r = p.add_run("内部研判材料，仅供决策参考")
     set_run_font(r, CN_KAI, 16)
 
     p = doc.add_paragraph(style="MATIC Title")
+    set_zero_first_line_indent(p)
     p.paragraph_format.space_before = Pt(72)
     p.paragraph_format.space_after = Pt(24)
     p.add_run("[项目名称]")
     p = doc.add_paragraph(style="MATIC Subtitle")
+    set_zero_first_line_indent(p)
     p.add_run("尽调报告")
     doc.add_paragraph("")
     add_meta_table(doc)
@@ -226,12 +229,12 @@ def build():
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(84)
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.first_line_indent = Pt(0)
+    set_zero_first_line_indent(p)
     r = p.add_run("长三角医学先进技术创新中心")
     set_run_font(r, CN_BODY, 16)
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.first_line_indent = Pt(0)
+    set_zero_first_line_indent(p)
     r = p.add_run("[YYYY年MM月DD日]")
     set_run_font(r, CN_BODY, 16)
     p.runs[0].add_break(WD_BREAK.PAGE)

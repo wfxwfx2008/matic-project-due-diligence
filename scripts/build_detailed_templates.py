@@ -23,7 +23,7 @@ from build_template import (
     set_cell_text,
     set_run_font,
 )
-from normalize_docx_tables import normalize_table_paragraphs
+from normalize_docx_tables import normalize_table_paragraphs, set_zero_first_line_indent
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,7 +31,7 @@ STARTUP_OUTPUT = ROOT / "assets" / "matic-detailed-dd-startup-template.docx"
 REPORT_OUTPUT = ROOT / "assets" / "matic-detailed-due-diligence-template.docx"
 
 
-def new_matic_document():
+def new_matic_document(justify_body=False):
     doc = Document()
     section = doc.sections[0]
     section.page_width = Cm(21)
@@ -41,7 +41,8 @@ def new_matic_document():
     section.left_margin = Cm(2.7)
     section.right_margin = Cm(2.7)
 
-    configure_style(doc.styles["Normal"], CN_BODY, 16, indent=True)
+    body_alignment = WD_ALIGN_PARAGRAPH.JUSTIFY if justify_body else None
+    configure_style(doc.styles["Normal"], CN_BODY, 16, align=body_alignment, indent=True)
     styles = {
         "title": get_or_add_paragraph_style(doc, "MATIC Title"),
         "subtitle": get_or_add_paragraph_style(doc, "MATIC Subtitle"),
@@ -52,9 +53,9 @@ def new_matic_document():
     }
     configure_style(styles["title"], CN_TITLE, 22, align=WD_ALIGN_PARAGRAPH.CENTER, indent=False)
     configure_style(styles["subtitle"], CN_KAI, 16, align=WD_ALIGN_PARAGRAPH.CENTER, indent=False)
-    configure_style(styles["heading1"], CN_HEI, 16, bold=True, indent=False, outline_level=0)
-    configure_style(styles["heading2"], CN_KAI, 16, indent=False, outline_level=1)
-    configure_style(styles["heading3"], CN_KAI, 16, indent=False, outline_level=2)
+    configure_style(styles["heading1"], CN_HEI, 16, bold=True, align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, outline_level=0)
+    configure_style(styles["heading2"], CN_KAI, 16, align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, outline_level=1)
+    configure_style(styles["heading3"], CN_KAI, 16, align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, outline_level=2)
     configure_style(styles["caption"], CN_BODY, 10.5, align=WD_ALIGN_PARAGRAPH.CENTER, indent=False)
 
     source = (
@@ -62,7 +63,7 @@ def new_matic_document():
         if "Source Text" in [style.name for style in doc.styles]
         else doc.styles.add_style("Source Text", WD_STYLE_TYPE.PARAGRAPH)
     )
-    configure_style(source, CN_BODY, 10.5, indent=False)
+    configure_style(source, CN_BODY, 10.5, align=WD_ALIGN_PARAGRAPH.LEFT, indent=False)
 
     for style in (styles["heading1"], styles["heading2"], styles["heading3"]):
         style.paragraph_format.keep_with_next = True
@@ -84,28 +85,30 @@ def add_meta_table(doc, rows):
 def add_cover(doc, document_name, meta_rows):
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.first_line_indent = Pt(0)
+    set_zero_first_line_indent(p)
     p.paragraph_format.space_after = Pt(48)
     run = p.add_run("内部研判材料，仅供决策参考")
     set_run_font(run, CN_KAI, 16)
 
     p = doc.add_paragraph(style="MATIC Title")
+    set_zero_first_line_indent(p)
     p.paragraph_format.space_before = Pt(72)
     p.paragraph_format.space_after = Pt(24)
     p.add_run("[项目名称]")
     p = doc.add_paragraph(style="MATIC Subtitle")
+    set_zero_first_line_indent(p)
     p.add_run(document_name)
     doc.add_paragraph("")
     add_meta_table(doc, meta_rows)
 
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(84)
-    p.paragraph_format.first_line_indent = Pt(0)
+    set_zero_first_line_indent(p)
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = p.add_run("长三角医学先进技术创新中心")
     set_run_font(run, CN_BODY, 16)
     p = doc.add_paragraph()
-    p.paragraph_format.first_line_indent = Pt(0)
+    set_zero_first_line_indent(p)
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = p.add_run("[YYYY年MM月DD日]")
     set_run_font(run, CN_BODY, 16)
@@ -305,7 +308,7 @@ def build_startup_template():
 
 
 def build_report_template():
-    doc = new_matic_document()
+    doc = new_matic_document(justify_body=True)
     add_cover(
         doc,
         "详细尽调报告",
