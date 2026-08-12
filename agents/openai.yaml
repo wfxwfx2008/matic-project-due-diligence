@@ -1,13 +1,13 @@
 interface:
-  display_name: 医创中心项目尽调
-  short_description: 核验医疗科技项目BP，并持续开展标准与详细尽调
-  default_prompt: 使用 $matic-project-due-diligence 处理这个项目；先识别是标准尽调、详细尽调更新还是报告生成，再按对应流程执行。
-  icon_small: assets/icon.svg
-  icon_large: assets/icon.svg
+  display_name: "医创中心项目尽调"
+  short_description: "甄别突破性医疗技术，开展标准尽调、详细尽调与持续核验"
+  default_prompt: "使用 $matic-project-due-diligence 处理这个项目；先识别工作模式，再重点核验突破价值、国产替代、路线拥挤度及差异化，并按对应流程执行。"
+  icon_small: "./assets/icon.svg"
+  icon_large: "./assets/icon.svg"
 policy:
   allow_implicit_invocation: false
   products:
-  - chatgpt
-  - codex
-  - api
-  - atlas
+  - "chatgpt"
+  - "codex"
+  - "api"
+  - "atlas"

@@ -192,20 +192,26 @@ def add_second_part_section(doc, heading, kind="text"):
             4,
         )
     elif kind == "competition":
-        doc.add_paragraph("（一）竞争格局、代表产品与替代路线", style="MATIC Heading 3")
+        doc.add_paragraph("（一）具体产品与方案比较", style="MATIC Heading 3")
         add_placeholder_table(
             doc,
-            ["对比编号/对象", "类别与阶段", "对比维度", "本项目相对优劣势", "证据/可比性", "竞争影响"],
+            ["CMP-P编号/竞争关系", "产品/方案及主体", "技术路线/场景", "注册上市/商业化", "与本项目比较", "证据与可比性", "竞争影响", "验证事项"],
             6,
         )
-        doc.add_paragraph("（二）专家证据、持续性与验证计划", style="MATIC Heading 3")
+        doc.add_paragraph("（二）技术路线比较", style="MATIC Heading 3")
+        add_placeholder_table(
+            doc,
+            ["CMP-R编号/技术路线", "原理/适用场景", "代表产品/最高阶段", "主要优势", "主要局限", "成熟度/拥挤度", "替代关系/战略分类", "证据边界/验证任务"],
+            6,
+        )
+        doc.add_paragraph("（三）专家证据、持续性与验证计划", style="MATIC Heading 3")
         add_placeholder_table(
             doc,
             ["当前判断", "专家支持/反对及限制", "持续性或可弥补性", "验证动作与判定标准"],
             4,
         )
         doc.add_paragraph(
-            "[第二部分完整保留全部有效比较；仅有公开证据或AI推断的内容标注待专家验证，不得冒充第一部分专家结论。]"
+            "[第二部分完整保留两类矩阵及全部有效比较；说明0到1突破、关键国产替代、路线成熟度与拥挤度。仅有公开证据或AI推断的内容标注待专家验证，不得冒充第一部分专家结论。]"
         )
     elif kind == "market":
         doc.add_paragraph("（一）五层市场模型及变化", style="MATIC Heading 3")
@@ -266,7 +272,7 @@ def build_startup_template():
         6,
     )
     doc.add_paragraph(
-        "说明：继承标准尽调的竞品与替代方案比较，建立暂定竞品矩阵并标注待专家验证；继承五层市场模型，市场规模不作为固定专家访谈重点。"
+        "说明：分别继承标准尽调的具体产品与方案比较、技术路线比较，建立CMP-P与CMP-R暂定矩阵并标注待专家验证；同步继承0到1突破、关键国产替代、路线成熟度与拥挤度判断，以及五层市场模型。"
     )
 
     doc.add_paragraph("四、调研对象与访谈安排", style="MATIC Heading 1")

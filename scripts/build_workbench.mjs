@@ -156,8 +156,14 @@ async function ensureFrozenPanes(xlsxPath) {
   const patched = path.join(tempRoot, "patched.xlsx");
   await fs.mkdir(unpacked, { recursive: true });
   try {
-    await execFileAsync("unzip", ["-q", xlsxPath, "-d", unpacked]);
-    for (let index = 1; index <= 10; index += 1) {
+    const python = process.env.MATIC_PYTHON || (process.platform === "win32" ? "python" : "python3");
+    await execFileAsync(python, [
+      "-c",
+      "import pathlib,sys,zipfile; zipfile.ZipFile(sys.argv[1]).extractall(pathlib.Path(sys.argv[2]))",
+      xlsxPath,
+      unpacked,
+    ]);
+    for (let index = 1; index <= 11; index += 1) {
       const rows = index === 1 ? 2 : 4;
       const xmlPath = path.join(unpacked, "xl", "worksheets", `sheet${index}.xml`);
       let xml = await fs.readFile(xmlPath, "utf8");
@@ -170,7 +176,12 @@ async function ensureFrozenPanes(xlsxPath) {
       }
       await fs.writeFile(xmlPath, xml, "utf8");
     }
-    await execFileAsync("zip", ["-qr", patched, "."], { cwd: unpacked });
+    await execFileAsync(python, [
+      "-c",
+      "import pathlib,sys,zipfile; root=pathlib.Path(sys.argv[1]); out=pathlib.Path(sys.argv[2]); z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.relative_to(root).as_posix()) for p in root.rglob('*') if p.is_file()]; z.close()",
+      unpacked,
+      patched,
+    ]);
     await fs.copyFile(patched, xlsxPath);
   } finally {
     await fs.rm(tempRoot, { recursive: true, force: true });
@@ -183,7 +194,8 @@ const home = workbook.worksheets.add("首页");
 const candidate = workbook.worksheets.add("调研对象候选库");
 const interview = workbook.worksheets.add("联系与访谈进度");
 const material = workbook.worksheets.add("材料及专家报告索引");
-const competition = workbook.worksheets.add("竞品与替代方案矩阵");
+const productMatrix = workbook.worksheets.add("具体产品与方案矩阵");
+const routeMatrix = workbook.worksheets.add("技术路线矩阵");
 const issue = workbook.worksheets.add("问题跟踪表");
 const conclusion = workbook.worksheets.add("结论登记表");
 const dispute = workbook.worksheets.add("专家分歧表");
@@ -240,23 +252,41 @@ formatDateColumns(material, ["G"]);
 
 
 applyBaseSheet(
-  competition,
-  "竞品与替代方案矩阵",
-  "每个“比较对象×对比维度”单独一行并沿用稳定CMP编号；启动时继承标准尽调结果，新增材料须主动识别新对象、新路线和新优劣势。",
-  ["对比编号", "对比对象", "研发或供应主体", "对象分类", "产品/技术阶段", "目标适应证或场景", "对比维度", "本项目相对结论", "具体判断", "数据比较条件", "可比性", "证据性质", "证据强度", "专家支持", "专家反对或限制", "对竞争地位的影响", "持续性或可弥补性", "下一步验证动作", "判定标准", "关联问题编号", "关联材料或访谈编号", "关联结论编号", "当前状态", "最后更新日期", "备注"],
-  [12, 24, 22, 18, 18, 24, 18, 16, 34, 30, 15, 22, 12, 30, 30, 18, 20, 30, 28, 18, 24, 20, 16, 15, 24],
-  "CompetitionMatrix",
+  productMatrix,
+  "具体产品与方案矩阵",
+  "每个“产品或方案×对比维度”单独一行并沿用稳定CMP-P编号；直接竞品按临床决策、患者、场景或采购预算重叠判断，注册/上市状态与商业化状态分开记录。",
+  ["对比编号", "竞争关系", "产品或方案名称", "厂家、研发或供应主体", "国家或地区", "技术路线", "目标适应证、场景或科室", "注册或上市状态", "商业化状态", "对比维度", "本项目相对结论", "具体判断", "数据比较条件", "可比性", "证据性质", "证据强度", "专家支持", "专家反对或限制", "对竞争地位的影响", "持续性或可弥补性", "下一步验证动作", "判定标准", "关联技术路线编号", "关联问题编号", "关联材料或访谈编号", "关联结论编号", "当前状态", "最后更新日期", "备注"],
+  [13, 12, 20, 20, 11, 18, 22, 18, 15, 16, 15, 28, 24, 13, 18, 11, 22, 22, 17, 18, 22, 20, 15, 15, 20, 15, 13, 14, 20],
+  "ProductSolutionMatrix",
 );
-addListValidation(competition, "D", ["直接竞品", "间接竞品", "医院现行方案", "潜在替代技术"]);
-addListValidation(competition, "H", ["相对优势", "相对劣势", "基本相当", "暂无法判断"]);
-addListValidation(competition, "K", ["直接可比", "有限可比", "不可直接比较"]);
-addListValidation(competition, "L", ["直接头对头数据", "可比公开数据", "跨研究间接比较", "项目方主张", "专家判断", "暂无可靠证据"]);
-addListValidation(competition, "M", ["强", "中", "弱"]);
-addListValidation(competition, "P", ["重大正面", "正面", "中性", "负面", "重大负面", "待判断"]);
-addListValidation(competition, "Q", ["结构性优势", "阶段性领先", "容易追赶", "可弥补劣势", "难弥补劣势", "待判断", "不适用"]);
-addListValidation(competition, "W", ["草拟", "待补证", "基本确认", "已确认", "仍有争议", "已替代", "已失效"]);
-addStatusFormatting(competition, `W${DATA_START}:W${DATA_END}`);
-formatDateColumns(competition, ["X"]);
+addListValidation(productMatrix, "B", ["直接竞品", "间接竞品", "医院现行方案"]);
+addListValidation(productMatrix, "I", ["未销售", "早期商业化", "规模化销售", "退出或停产", "暂无可靠信息"]);
+addListValidation(productMatrix, "K", ["相对优势", "相对劣势", "基本相当", "暂无法判断"]);
+addListValidation(productMatrix, "N", ["直接可比", "有限可比", "不可直接比较"]);
+addListValidation(productMatrix, "O", ["直接头对头数据", "可比公开数据", "跨研究间接比较", "项目方主张", "专家判断", "暂无可靠证据"]);
+addListValidation(productMatrix, "P", ["强", "中", "弱"]);
+addListValidation(productMatrix, "S", ["重大正面", "正面", "中性", "负面", "重大负面", "待判断"]);
+addListValidation(productMatrix, "T", ["结构性优势", "阶段性领先", "容易追赶", "可弥补劣势", "难弥补劣势", "待判断", "不适用"]);
+addListValidation(productMatrix, "AA", ["草拟", "待补证", "基本确认", "已确认", "仍有争议", "已替代", "已失效"]);
+addStatusFormatting(productMatrix, `AA${DATA_START}:AA${DATA_END}`);
+formatDateColumns(productMatrix, ["AB"]);
+
+applyBaseSheet(
+  routeMatrix,
+  "技术路线矩阵",
+  "每个“技术路线×对比维度”单独一行并沿用稳定CMP-R编号；本项目路线必须登记，持续验证突破价值、关键国产替代、路线成熟度、拥挤度和替代关系。",
+  ["路线编号", "技术路线", "是否本项目路线", "核心原理", "适用场景、目标人群及限制", "代表产品或研发项目", "最高阶段", "对比维度", "主要优势", "主要局限", "路线成熟度", "路线拥挤度", "与本项目关系", "战略分类", "具体判断", "证据边界", "专家支持", "专家反对或限制", "对项目竞争地位的影响", "下一步验证动作", "判定标准", "关联产品/方案编号", "关联问题编号", "关联材料或访谈编号", "关联结论编号", "当前状态", "最后更新日期", "备注"],
+  [13, 20, 13, 24, 26, 22, 15, 16, 24, 24, 15, 15, 17, 19, 28, 24, 22, 22, 18, 22, 20, 18, 15, 20, 15, 13, 14, 20],
+  "TechnologyRouteMatrix",
+);
+addListValidation(routeMatrix, "C", ["是", "否"]);
+addListValidation(routeMatrix, "K", ["早期探索", "快速发展", "相对成熟", "高度成熟"]);
+addListValidation(routeMatrix, "L", ["稀缺", "较少", "一般", "拥挤", "高度拥挤"]);
+addListValidation(routeMatrix, "M", ["本项目路线", "直接替代", "部分替代", "互补", "未来潜在替代"]);
+addListValidation(routeMatrix, "N", ["0到1原创突破", "关键国产替代", "有效差异化", "跟随或局部改进", "同质化竞争", "暂无法判断"]);
+addListValidation(routeMatrix, "Z", ["草拟", "待补证", "基本确认", "已确认", "仍有争议", "已替代", "已失效"]);
+addStatusFormatting(routeMatrix, `Z${DATA_START}:Z${DATA_END}`);
+formatDateColumns(routeMatrix, ["AA"]);
 
 
 applyBaseSheet(
@@ -368,12 +398,13 @@ home.getRange("A5:B11").values = [
   ["当前尽调建议", "[待填写]"],
 ];
 home.getRange("D4:E4").values = [["进展指标", "当前数量"]];
-home.getRange("D5:D11").values = [["候选对象"], ["已完成访谈"], ["已登记材料"], ["竞品对比记录"], ["开放问题"], ["有效结论"], ["重大风险"]];
-home.getRange("E5:E11").formulas = [
+home.getRange("D5:D12").values = [["候选对象"], ["已完成访谈"], ["已登记材料"], ["产品/方案记录"], ["技术路线记录"], ["开放问题"], ["有效结论"], ["重大风险"]];
+home.getRange("E5:E12").formulas = [
   ["=COUNTA('调研对象候选库'!$A$5:$A$204)"],
   ["=COUNTIF('联系与访谈进度'!$F$5:$F$204,\"已完成\")"],
   ["=COUNTA('材料及专家报告索引'!$A$5:$A$204)"],
-  ["=COUNTA('竞品与替代方案矩阵'!$A$5:$A$204)"],
+  ["=COUNTA('具体产品与方案矩阵'!$A$5:$A$204)"],
+  ["=COUNTA('技术路线矩阵'!$A$5:$A$204)"],
   ["=COUNTIF('问题跟踪表'!$H$5:$H$204,\"<>\")-COUNTIF('问题跟踪表'!$H$5:$H$204,\"已确认\")-COUNTIF('问题跟踪表'!$H$5:$H$204,\"已解除风险\")"],
   ["=COUNTIFS('结论登记表'!$A$5:$A$204,\"<>\",'结论登记表'!$J$5:$J$204,\"<>已合并\",'结论登记表'!$J$5:$J$204,\"<>已推翻\",'结论登记表'!$J$5:$J$204,\"<>已失效\")"],
   ["=COUNTIF('问题跟踪表'!$I$5:$I$204,\"重大\")"],
@@ -384,7 +415,7 @@ home.getRange("A4:B11").format = {
   borders: { preset: "all", style: "thin", color: COLORS.border },
   verticalAlignment: "center",
 };
-home.getRange("D4:E11").format = {
+home.getRange("D4:E12").format = {
   font: { name: FONT, size: 10, color: COLORS.text },
   wrapText: true,
   borders: { preset: "all", style: "thin", color: COLORS.border },
@@ -393,8 +424,8 @@ home.getRange("D4:E11").format = {
 home.getRange("A4:B4").format = { fill: COLORS.navy, font: { name: FONT, size: 10, bold: true, color: COLORS.white }, horizontalAlignment: "center" };
 home.getRange("D4:E4").format = { fill: COLORS.navy, font: { name: FONT, size: 10, bold: true, color: COLORS.white }, horizontalAlignment: "center" };
 home.getRange("A5:A11").format = { fill: COLORS.blue, font: { name: FONT, size: 10, bold: true, color: COLORS.text } };
-home.getRange("D5:D11").format = { fill: COLORS.blue, font: { name: FONT, size: 10, bold: true, color: COLORS.text } };
-home.getRange("E5:E11").format.numberFormat = "0";
+home.getRange("D5:D12").format = { fill: COLORS.blue, font: { name: FONT, size: 10, bold: true, color: COLORS.text } };
+home.getRange("E5:E12").format.numberFormat = "0";
 
 home.getRange("A13:D13").merge();
 home.getRange("A13").values = [["状态色说明"]];
@@ -418,7 +449,7 @@ home.getRange("A20:H24").merge(true);
 home.getRange("A20:A24").values = [
   ["1. 启动详细尽调时先建立问题、候选对象和材料计划，不得在无专家证据时强行形成稳定结论。"],
   ["2. 每份新材料先登记索引，再更新问题、结论、分歧和第一部分入选结论。"],
-  ["3. 竞品矩阵每行记录一个对象与一个维度；每次更新均检查新对象、新路线、新优劣势及比较条件变化。"],
+  ["3. 产品/方案与技术路线分别维护；每次更新均检查新对象、新路线、突破价值、路线拥挤度、相对优劣势及比较条件变化。"],
   ["4. 阶段性或最终报告只在明确指令后生成；成文前检查专家证据门槛、去重和结论历史。"],
   ["5. 本工作台不处理录音转写，不设置固定市场规模工作表；市场重大变化使用现有清单记录。"],
 ];
@@ -440,7 +471,7 @@ await ensureFrozenPanes(outputPath);
 
 if (previewDir) {
   await fs.mkdir(previewDir, { recursive: true });
-  for (const sheetName of ["首页", "调研对象候选库", "联系与访谈进度", "材料及专家报告索引", "竞品与替代方案矩阵", "问题跟踪表", "结论登记表", "专家分歧表", "第一部分入选结论", "更新日志"]) {
+  for (const sheetName of ["首页", "调研对象候选库", "联系与访谈进度", "材料及专家报告索引", "具体产品与方案矩阵", "技术路线矩阵", "问题跟踪表", "结论登记表", "专家分歧表", "第一部分入选结论", "更新日志"]) {
     const preview = await workbook.render({ sheetName, autoCrop: "all", scale: 1, format: "png" });
     const safeName = sheetName.replaceAll("/", "_");
     await fs.writeFile(path.join(previewDir, `${safeName}.png`), new Uint8Array(await preview.arrayBuffer()));
