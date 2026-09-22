@@ -22,6 +22,53 @@ CN_KAI = "方正楷体_GBK"
 CN_HEI = "方正黑体_GBK"
 EN_FONT = "Times New Roman"
 
+PRODUCT_COMPARISON_DIMENSIONS = [
+    "产品/方案及主体",
+    "厂家及国家/地区",
+    "竞争关系",
+    "技术路线",
+    "适应证/目标人群/场景",
+    "注册/上市状态",
+    "商业化状态",
+    "核心定位",
+    "[关键指标1：名称、单位及口径]",
+    "[关键指标2：名称、单位及口径]",
+    "[关键指标3：名称、单位及口径]",
+    "临床证据",
+    "安全性/主要限制",
+    "工作流/使用条件",
+    "价格/全周期成本",
+    "供应/渠道",
+    "相对优势",
+    "相对劣势",
+    "证据边界/待核实事项",
+]
+
+ROUTE_COMPARISON_DIMENSIONS = [
+    "技术路线",
+    "核心原理",
+    "适用场景/目标人群",
+    "代表产品/最高阶段",
+    "[关键指标1：名称、单位及口径]",
+    "[关键指标2：名称、单位及口径]",
+    "临床证据成熟度",
+    "注册/产业化难度",
+    "成本/设备/使用条件",
+    "主要优势",
+    "主要局限",
+    "路线成熟度",
+    "路线拥挤度",
+    "与本项目关系",
+    "战略分类",
+    "证据边界/验证任务",
+]
+
+COMPARISON_NOTE = (
+    "填表说明：不强制使用符号。二元功能可用“✓/×”并补充限制；数值指标填写数值、单位和必要条件；"
+    "分类、阶段和状态使用简短文字；复杂限制使用文字说明。厂商自述标注“厂商披露，待独立核实”；"
+    "信息缺口区分“未披露”“暂无可靠证据”“待核实”“不适用”。如使用符号，须在表下注明含义。"
+)
+
 
 def set_run_font(run, east_asia, size, bold=False):
     run.font.name = EN_FONT
@@ -144,6 +191,19 @@ def add_placeholder_table(doc, headers, row_count=2):
         set_cell_text(table.rows[0].cells[idx], header, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
     for row in table.rows[1:]:
         for cell in row.cells:
+            set_cell_text(cell, "[待填写]")
+    return table
+
+
+def add_horizontal_comparison_table(doc, headers, dimensions):
+    table = doc.add_table(rows=1 + len(dimensions), cols=len(headers))
+    table.style = "Table Grid"
+    table.rows[0]._tr.get_or_add_trPr().append(OxmlElement("w:tblHeader"))
+    for idx, header in enumerate(headers):
+        set_cell_text(table.rows[0].cells[idx], header, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
+    for row, dimension in zip(table.rows[1:], dimensions):
+        set_cell_text(row.cells[0], dimension, bold=True)
+        for cell in row.cells[1:]:
             set_cell_text(cell, "[待填写]")
     return table
 
@@ -288,35 +348,30 @@ def build():
             add_placeholder_table(doc, ["序号", "BP关键主张", "外部证据", "核验结果", "置信度", "影响"], 3)
         elif idx == 8:
             doc.add_paragraph("（一）国内外具体竞品及替代产品/方案比较", style="MATIC Heading 3")
-            add_placeholder_table(
+            add_horizontal_comparison_table(
                 doc,
                 [
-                    "竞争关系",
-                    "产品/方案及主体",
-                    "技术路线",
-                    "适应证/场景",
-                    "注册/上市状态",
-                    "商业化状态",
-                    "与本项目比较",
-                    "证据、竞争影响及验证事项",
+                    "比较维度",
+                    "本项目产品",
+                    "[直接竞品A]",
+                    "[直接竞品B]",
+                    "[间接竞品/现行方案]",
                 ],
-                5,
+                PRODUCT_COMPARISON_DIMENSIONS,
             )
             doc.add_paragraph("（二）不同技术路线比较", style="MATIC Heading 3")
-            add_placeholder_table(
+            add_horizontal_comparison_table(
                 doc,
                 [
-                    "技术路线及原理",
-                    "场景/人群",
-                    "代表产品/最高阶段",
-                    "主要优势",
-                    "主要局限",
-                    "成熟度/拥挤度",
-                    "与本项目关系/战略含义",
-                    "证据边界及验证任务",
+                    "比较维度",
+                    "本项目技术路线",
+                    "[其他路线A]",
+                    "[其他路线B]",
+                    "[其他路线C]",
                 ],
-                4,
+                ROUTE_COMPARISON_DIMENSIONS,
             )
+            doc.add_paragraph(COMPARISON_NOTE, style="Source Text")
             doc.add_paragraph(
                 "路线拥挤度与战略筛选结论：[判断项目属于0到1原创突破、关键国产替代、有效差异化、跟随或局部改进、同质化拥挤中的哪一类，并说明对推进建议的影响。]"
             )

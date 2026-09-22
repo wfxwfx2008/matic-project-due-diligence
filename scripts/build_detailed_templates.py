@@ -15,6 +15,10 @@ from build_template import (
     CN_HEI,
     CN_KAI,
     CN_TITLE,
+    COMPARISON_NOTE,
+    PRODUCT_COMPARISON_DIMENSIONS,
+    ROUTE_COMPARISON_DIMENSIONS,
+    add_horizontal_comparison_table,
     add_page_number,
     add_placeholder_table,
     configure_style,
@@ -193,25 +197,38 @@ def add_second_part_section(doc, heading, kind="text"):
         )
     elif kind == "competition":
         doc.add_paragraph("（一）具体产品与方案比较", style="MATIC Heading 3")
-        add_placeholder_table(
+        add_horizontal_comparison_table(
             doc,
-            ["CMP-P编号/竞争关系", "产品/方案及主体", "技术路线/场景", "注册上市/商业化", "与本项目比较", "证据与可比性", "竞争影响", "验证事项"],
-            6,
+            [
+                "比较维度",
+                "本项目产品｜CMP-P",
+                "[直接竞品A｜CMP-P]",
+                "[直接竞品B｜CMP-P]",
+                "[其他方案｜CMP-P]",
+            ],
+            PRODUCT_COMPARISON_DIMENSIONS,
         )
         doc.add_paragraph("（二）技术路线比较", style="MATIC Heading 3")
-        add_placeholder_table(
+        add_horizontal_comparison_table(
             doc,
-            ["CMP-R编号/技术路线", "原理/适用场景", "代表产品/最高阶段", "主要优势", "主要局限", "成熟度/拥挤度", "替代关系/战略分类", "证据边界/验证任务"],
-            6,
+            [
+                "比较维度",
+                "本项目技术路线｜CMP-R",
+                "[其他路线A｜CMP-R]",
+                "[其他路线B｜CMP-R]",
+                "[其他路线C｜CMP-R]",
+            ],
+            ROUTE_COMPARISON_DIMENSIONS,
         )
-        doc.add_paragraph("（三）专家证据、持续性与验证计划", style="MATIC Heading 3")
+        doc.add_paragraph(COMPARISON_NOTE, style="Source Text")
+        doc.add_paragraph("（三）证据、可比性与验证计划", style="MATIC Heading 3")
         add_placeholder_table(
             doc,
-            ["当前判断", "专家支持/反对及限制", "持续性或可弥补性", "验证动作与判定标准"],
+            ["矩阵/比较维度", "专家支持/反对及限制", "证据性质/可比性", "持续性或可弥补性", "验证动作与判定标准"],
             4,
         )
         doc.add_paragraph(
-            "[第二部分完整保留两类矩阵及全部有效比较；说明0到1突破、关键国产替代、路线成熟度与拥挤度。仅有公开证据或AI推断的内容标注待专家验证，不得冒充第一部分专家结论。]"
+            "[工作台保持对象/路线×维度的证据长表；成文时透视为以上两张横向矩阵。对象较多时按对象拆成连续子表，保留本项目列和相同维度。第二部分完整保留全部有效比较，并说明0到1突破、关键国产替代、路线成熟度与拥挤度。仅有公开证据或AI推断的内容标注待专家验证，不得冒充第一部分专家结论。]"
         )
     elif kind == "market":
         doc.add_paragraph("（一）五层市场模型及变化", style="MATIC Heading 3")
@@ -272,7 +289,7 @@ def build_startup_template():
         6,
     )
     doc.add_paragraph(
-        "说明：分别继承标准尽调的具体产品与方案比较、技术路线比较，建立CMP-P与CMP-R暂定矩阵并标注待专家验证；同步继承0到1突破、关键国产替代、路线成熟度与拥挤度判断，以及五层市场模型。"
+        "说明：分别继承标准尽调的具体产品与方案横向矩阵、技术路线横向矩阵，在工作台拆解为CMP-P与CMP-R证据长表并标注待专家验证；报告成文时再按维度转置为横向矩阵。同步继承0到1突破、关键国产替代、路线成熟度与拥挤度判断，以及五层市场模型。"
     )
 
     doc.add_paragraph("四、调研对象与访谈安排", style="MATIC Heading 1")
